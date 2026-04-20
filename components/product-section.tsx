@@ -120,8 +120,8 @@ export function ProductSection() {
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-foreground mb-6 text-balance">
             Flexicore<sup className="text-lg">®</sup> Solid Surface Makes Creative Visions Real
           </h2>
-          <div className="flex justify-center mb-4">
-            <div className="w-1 h-8 bg-primary" />
+          <div className="flex justify-center mb-6">
+            <div className="w-12 h-1 bg-primary/40" />
           </div>
           <p className="text-lg text-primary font-medium mb-4">
             Engrave it. Color it. Thermoform it.
