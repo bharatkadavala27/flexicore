@@ -71,11 +71,11 @@ export function HomeTeamFounder() {
 
         <div className="grid lg:grid-cols-12 gap-10 items-stretch">
           {/* Founder highlight */}
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-5 min-w-0">
             <article className="relative h-full flex flex-col bg-muted overflow-hidden group">
-              <div className="relative aspect-[4/5] overflow-hidden">
+              <div className="relative aspect-video md:aspect-[4/5] overflow-hidden">
                 <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-[900ms] ease-out group-hover:scale-105"
+                  className="absolute inset-0 bg-cover bg-top transition-transform duration-[900ms] ease-out group-hover:scale-105"
                   style={{ backgroundImage: "url(/founder.png), url(/placeholder-user.jpg)" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/10 to-transparent" />
@@ -111,7 +111,7 @@ export function HomeTeamFounder() {
           </div>
 
           {/* Team strip */}
-          <div className="lg:col-span-7 flex flex-col">
+          <div className="lg:col-span-7 flex flex-col min-w-0">
             <div className="flex items-end justify-between mb-6">
               <div>
                 <h3 className="text-2xl md:text-3xl font-light text-primary">Our team</h3>
@@ -145,7 +145,7 @@ export function HomeTeamFounder() {
               {team.map((m) => (
                 <article
                   key={m.name}
-                  className="snap-start shrink-0 w-[220px] md:w-[260px] group transition-transform duration-250 hover:-translate-y-1.5"
+                  className="snap-start shrink-0 w-[160px] sm:w-[200px] md:w-[260px] group transition-transform duration-250 hover:-translate-y-1.5"
                 >
                   <div className="relative aspect-[3/4] overflow-hidden bg-muted mb-4">
                     <div

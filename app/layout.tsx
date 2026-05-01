@@ -14,6 +14,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.flexicore.com'),
   title: {
     default: 'Flexicore | Premium Solid Surface & Tiles Manufacturer',
     template: '%s | Flexicore',
