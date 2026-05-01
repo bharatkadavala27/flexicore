@@ -55,11 +55,11 @@ export function Header() {
         className="absolute top-0 left-0 z-40 bg-white"
         aria-label="Flexicore Home"
       >
-        <div className="relative w-[220px] h-[130px] flex items-center justify-center">
-          <span className="absolute top-3 left-3 w-6 h-px bg-primary" />
-          <span className="absolute top-3 left-3 w-px h-6 bg-primary" />
-          <span className="absolute bottom-3 right-3 w-6 h-px bg-primary" />
-          <span className="absolute bottom-3 right-3 w-px h-6 bg-primary" />
+        <div className="relative w-[180px] h-[90px] md:w-[220px] md:h-[130px] flex items-center justify-center">
+          <span className="absolute top-3 left-3 w-4 md:w-6 h-px bg-primary" />
+          <span className="absolute top-3 left-3 w-px h-4 md:h-6 bg-primary" />
+          <span className="absolute bottom-3 right-3 w-4 md:w-6 h-px bg-primary" />
+          <span className="absolute bottom-3 right-3 w-px h-4 md:h-6 bg-primary" />
 
           <div className="flex flex-col items-center">
             <span className="text-[28px] leading-none font-bold tracking-[0.15em] text-foreground">
@@ -71,7 +71,7 @@ export function Header() {
           </div>
         </div>
 
-        <div className="bg-primary text-primary-foreground px-5 py-4 w-[220px]">
+        <div className="bg-primary text-primary-foreground px-4 md:px-5 py-3 md:py-4 w-[180px] md:w-[220px]">
           <div className="flex items-center gap-2 text-xs mb-1">
             <span>Visit also</span>
             <span aria-hidden="true">&rarr;</span>
@@ -92,8 +92,8 @@ export function Header() {
         <button
           onClick={() => setIsMenuOpen((v) => !v)}
           className={cn(
-            "relative overflow-hidden w-[130px] h-[130px] flex items-center justify-center",
-            "font-bold text-lg tracking-[0.2em] text-primary-foreground",
+            "relative overflow-hidden w-[90px] h-[90px] md:w-[130px] md:h-[130px] flex items-center justify-center",
+            "font-bold text-sm md:text-lg tracking-[0.2em] text-primary-foreground",
             "bg-primary transition-[background-color,transform] duration-500 ease-out",
             "hover:bg-primary/90",
             isMenuOpen && "scale-[0.92]",
@@ -150,7 +150,7 @@ export function Header() {
 
       {/* Search overlay */}
       {isSearchOpen && (
-        <div className="absolute top-[130px] right-0 z-40 w-80 bg-white border border-border shadow-lg p-4 animate-fade-up">
+        <div className="absolute top-[90px] md:top-[130px] right-0 z-40 w-full sm:w-80 bg-white border border-border shadow-lg p-4 animate-fade-up">
           <div className="flex items-center gap-2">
             <Search className="w-4 h-4 text-muted-foreground" />
             <input
@@ -217,7 +217,7 @@ export function Header() {
                   SOLID SURFACE
                 </span>
               </Link>
-              <div className="w-[130px] h-[130px]" aria-hidden="true" />
+              <div className="w-[90px] h-[90px] md:w-[130px] md:h-[130px]" aria-hidden="true" />
             </div>
 
             <nav className="flex-1 overflow-y-auto px-8 py-12 max-w-3xl mx-auto w-full">

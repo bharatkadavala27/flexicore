@@ -20,36 +20,57 @@ type PageProps = { params: Promise<{ slug: string }> }
 const SITE_URL = "https://www.flexicore.com"
 
 export async function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }))
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products`);
+    const products = await res.json();
+    return products.map((p: any) => ({ slug: p.slug }));
+  } catch {
+    return products.map((p) => ({ slug: p.slug }));
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
-  const p = getProduct(slug)
+  let p: any;
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products/slug/${slug}`);
+    p = await res.json();
+  } catch {
+    p = getProduct(slug);
+  }
+  
   if (!p) return { title: "Product not found" }
   return {
-    title: `${p.name} - ${p.category}`,
+    title: `${p.name} - ${p.category?.name || p.category}`,
     description: p.description,
-    openGraph: { images: [p.image] },
+    openGraph: { images: [p.images?.[0]?.url || p.image] },
   }
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params
-  const product = getProduct(slug)
+  let product: any;
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products/slug/${slug}`);
+    product = await res.json();
+    if (product.message) throw new Error();
+  } catch {
+    product = getProduct(slug);
+  }
+  
   if (!product) notFound()
 
-  const related = getRelatedProducts(product.slug, product.category)
+  const related = getRelatedProducts(product.slug, product.category?.slug || product.category)
   const productUrl = `${SITE_URL}/products/${product.slug}`
 
   const schemas: Record<string, unknown>[] = [
-    productSchema({
-      name: product.name,
-      description: product.description,
-      image: product.image,
-      sku: product.sku,
-      category: product.category,
-    }),
+      productSchema({
+        name: product.name,
+        description: product.description,
+        image: product.images?.[0]?.url || product.image,
+        sku: product.sku,
+        category: product.category?.name || product.category,
+      }),
     breadcrumbSchema([
       { name: "Home", url: `${SITE_URL}/` },
       { name: "Products", url: `${SITE_URL}/products` },
@@ -73,7 +94,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             Products
           </Link>
           <span>/</span>
-          <span className="capitalize">{product.category}</span>
+          <span className="capitalize">{product.category?.name || product.category}</span>
           <span>/</span>
           <span className="text-foreground">{product.name}</span>
         </div>
@@ -88,7 +109,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           {/* Info */}
           <div className="flex flex-col">
             <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
-              <span className="capitalize">{product.category}</span>
+              <span className="capitalize">{product.category?.name || product.category}</span>
               {product.isNew && (
                 <span className="bg-primary text-primary-foreground px-2 py-0.5 font-semibold">
                   New
@@ -246,7 +267,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   className="relative aspect-square group overflow-hidden bg-secondary transition-transform duration-250 hover:-translate-y-1.5"
                 >
                   <img
-                    src={r.image || "/placeholder.svg"}
+                    src={r.images?.[0]?.url || r.image || "/placeholder.svg"}
                     alt={r.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />

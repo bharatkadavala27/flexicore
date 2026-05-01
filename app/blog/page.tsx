@@ -1,12 +1,28 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { Calendar, Clock, User } from "lucide-react"
 import { SiteLayout, PageHeader } from "@/components/site-layout"
-import { blogPosts, blogCategories } from "@/lib/blog-data"
+import { blogCategories as staticBlogCategories } from "@/lib/blog-data"
+import { apiRequest } from "@/lib/admin-auth"
 
 export default function BlogPage() {
+  const [blogPosts, setBlogPosts] = useState<any[]>([])
+  const [blogCategories, setBlogCategories] = useState<string[]>(staticBlogCategories)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    apiRequest('/blogs')
+      .then(data => {
+        setBlogPosts(data)
+        const cats = Array.from(new Set(data.map((p: any) => p.category).filter(Boolean))) as string[]
+        if (cats.length > 0) setBlogCategories(["All", ...cats])
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
   const [cat, setCat] = useState("All")
 
   const filtered = useMemo(() => {
@@ -50,7 +66,7 @@ export default function BlogPage() {
             >
               <div className="aspect-[4/3] overflow-hidden bg-secondary">
                 <img
-                  src={featured.image || "/placeholder.svg"}
+                  src={featured.featuredImage?.url || featured.image || "/placeholder.svg"}
                   alt={featured.title}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -86,7 +102,7 @@ export default function BlogPage() {
                 <Link key={p.slug} href={`/blog/${p.slug}`} className="group">
                   <div className="aspect-[4/3] overflow-hidden bg-secondary">
                     <img
-                      src={p.image || "/placeholder.svg"}
+                      src={p.featuredImage?.url || p.image || "/placeholder.svg"}
                       alt={p.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />

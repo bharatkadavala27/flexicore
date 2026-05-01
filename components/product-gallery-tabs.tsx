@@ -14,7 +14,9 @@ export function ProductGalleryTabs({ product }: { product: Product }) {
   const [playing, setPlaying] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  const gallery = product.gallery.length ? product.gallery : [product.image]
+  const gallery = (product.gallery && product.gallery.length) 
+    ? product.gallery.map((g: any) => typeof g === 'string' ? g : g.url)
+    : [product.images?.[0]?.url || product.image]
   const hasVideo = Boolean(product.videoUrl)
 
   const togglePlay = () => {
@@ -80,7 +82,7 @@ export function ProductGalleryTabs({ product }: { product: Product }) {
             <video
               ref={videoRef}
               src={product.videoUrl}
-              poster={product.image}
+              poster={product.images?.[0]?.url || product.image}
               loop
               playsInline
               className="w-full h-full object-cover"

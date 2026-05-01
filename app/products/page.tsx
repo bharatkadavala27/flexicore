@@ -14,17 +14,33 @@ import {
 } from "lucide-react"
 import { SiteLayout, PageHeader } from "@/components/site-layout"
 import {
-  products,
-  categories,
+  ProductCategory,
+  Industry,
   industries,
-  type ProductCategory,
-  type Industry,
+  categories as staticCategories,
 } from "@/lib/products-data"
+import { apiRequest } from "@/lib/admin-auth"
 
 const hues = ["All", "White", "Beige", "Black", "Burgundy", "Copper", "Cream", "Charcoal"]
 const regions = ["All", "Global", "Europe", "Middle East", "Asia"]
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState<any[]>([])
+  const [categories, setCategories] = useState<any[]>(staticCategories)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([
+      apiRequest('/products'),
+      apiRequest('/categories')
+    ]).then(([p, c]) => {
+      setProducts(p)
+      if (c && c.length > 0) {
+        setCategories([{ id: "all", label: "All" }, ...c.map((cat: any) => ({ id: cat.slug, label: cat.name, _id: cat._id }))])
+      }
+    }).finally(() => setLoading(false))
+  }, [])
+
   const [query, setQuery] = useState("")
   const [cat, setCat] = useState<ProductCategory | "all">("all")
   const [industry, setIndustry] = useState<Industry | "all">("all")
@@ -274,7 +290,7 @@ export default function ProductsPage() {
                   className="relative aspect-square group overflow-hidden bg-secondary transition-transform duration-250 hover:-translate-y-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                 >
                   <img
-                    src={p.image || "/placeholder.svg"}
+                    src={p.images?.[0]?.url || p.image || "/placeholder.svg"}
                     alt={p.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />

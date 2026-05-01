@@ -291,6 +291,16 @@ export function SiteNav() {
               {t("cta.enquire", "Enquire Now")}
             </Link>
 
+            <Link
+              href="/admin/login"
+              className={cn(
+                "hidden md:inline-flex items-center gap-2 border border-primary text-primary text-xs font-semibold uppercase tracking-[0.15em] px-5 py-2.5 transition-all duration-300",
+                "hover:bg-primary hover:text-primary-foreground",
+              )}
+            >
+              Login
+            </Link>
+
             <button
               onClick={() => setMobileOpen((v) => !v)}
               className="lg:hidden p-2 text-foreground hover:text-primary transition-colors"
@@ -415,6 +425,14 @@ export function SiteNav() {
             className="mt-6 w-full inline-flex items-center justify-center bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-[0.15em] px-5 py-3.5"
           >
             {t("cta.enquire", "Enquire Now")}
+          </Link>
+
+          <Link
+            href="/admin/login"
+            onClick={() => setMobileOpen(false)}
+            className="mt-3 w-full inline-flex items-center justify-center border border-primary text-primary text-xs font-semibold uppercase tracking-[0.15em] px-5 py-3.5"
+          >
+            Login
           </Link>
 
           <div className="mt-8 pt-6 border-t border-border text-sm text-muted-foreground space-y-2">
