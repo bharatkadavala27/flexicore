@@ -2,18 +2,35 @@
 
 import { useState } from "react"
 import { CheckCircle2, Send } from "lucide-react"
+import { apiRequest } from "@/lib/admin-auth"
 
 export function ProductEnquiryForm({ productName }: { productName: string }) {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      await apiRequest('/enquiries', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...data,
+          type: 'product_enquiry',
+          subject: `Enquiry about ${productName}`
+        })
+      });
       setSubmitted(true)
-    }, 700)
+    } catch (err) {
+      console.error('Enquiry failed:', err);
+      alert('Failed to send enquiry. Please try again.');
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (submitted) {
@@ -38,6 +55,7 @@ export function ProductEnquiryForm({ productName }: { productName: string }) {
           <span className="text-xs uppercase tracking-wide text-muted-foreground">Full Name</span>
           <input
             required
+            name="name"
             type="text"
             className="mt-1 w-full border border-border px-3 py-2 text-sm outline-none focus:border-primary"
           />
@@ -46,6 +64,7 @@ export function ProductEnquiryForm({ productName }: { productName: string }) {
           <span className="text-xs uppercase tracking-wide text-muted-foreground">Email</span>
           <input
             required
+            name="email"
             type="email"
             className="mt-1 w-full border border-border px-3 py-2 text-sm outline-none focus:border-primary"
           />
@@ -53,6 +72,7 @@ export function ProductEnquiryForm({ productName }: { productName: string }) {
         <label className="block">
           <span className="text-xs uppercase tracking-wide text-muted-foreground">Phone</span>
           <input
+            name="phone"
             type="tel"
             className="mt-1 w-full border border-border px-3 py-2 text-sm outline-none focus:border-primary"
           />
@@ -60,6 +80,7 @@ export function ProductEnquiryForm({ productName }: { productName: string }) {
         <label className="block">
           <span className="text-xs uppercase tracking-wide text-muted-foreground">Country</span>
           <input
+            name="country"
             type="text"
             className="mt-1 w-full border border-border px-3 py-2 text-sm outline-none focus:border-primary"
           />
@@ -69,6 +90,7 @@ export function ProductEnquiryForm({ productName }: { productName: string }) {
         <span className="text-xs uppercase tracking-wide text-muted-foreground">Message</span>
         <textarea
           rows={3}
+          name="message"
           defaultValue={`I'd like more information about ${productName}.`}
           className="mt-1 w-full border border-border px-3 py-2 text-sm outline-none focus:border-primary resize-none"
         />

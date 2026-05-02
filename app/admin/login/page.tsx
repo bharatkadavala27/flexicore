@@ -103,9 +103,6 @@ export default function AdminLoginPage() {
               </button>
             </form>
 
-            <p className="text-center text-xs mt-6" style={{ color: 'rgba(255,255,255,0.3)' }}>
-              Default: admin@flexicore.com / admin123
-            </p>
           </div>
         </div>
 

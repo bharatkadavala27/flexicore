@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { CheckCircle2, Send } from "lucide-react"
+import { apiRequest } from "@/lib/admin-auth"
 
 const subjects = ["General enquiry", "Product information", "Distributor opportunity", "Media & press", "Careers", "Other"]
 
@@ -9,13 +10,29 @@ export function ContactForm() {
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
+    
+    const formData = new FormData(e.target as HTMLFormElement);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      await apiRequest('/enquiries', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...data,
+          name: `${data.firstName} ${data.lastName}`,
+          type: 'contact'
+        })
+      });
       setSent(true)
-    }, 700)
+    } catch (err) {
+      console.error('Submission failed:', err);
+      alert('Failed to send message. Please try again.');
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (sent) {
@@ -36,27 +53,27 @@ export function ContactForm() {
     <form onSubmit={submit} className="border border-border bg-white p-6 md:p-8 space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field label="First name" required>
-          <input required type="text" className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <input required name="firstName" type="text" className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary" />
         </Field>
         <Field label="Last name" required>
-          <input required type="text" className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <input required name="lastName" type="text" className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary" />
         </Field>
         <Field label="Email" required>
-          <input required type="email" className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <input required name="email" type="email" className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary" />
         </Field>
         <Field label="Phone">
-          <input type="tel" className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <input name="phone" type="tel" className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary" />
         </Field>
         <Field label="Company">
-          <input type="text" className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <input name="company" type="text" className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary" />
         </Field>
         <Field label="Country" required>
-          <input required type="text" className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary" />
+          <input required name="country" type="text" className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary" />
         </Field>
       </div>
 
       <Field label="Subject" required>
-        <select required className="w-full border border-border px-3 py-2.5 text-sm bg-white outline-none focus:border-primary">
+        <select required name="subject" className="w-full border border-border px-3 py-2.5 text-sm bg-white outline-none focus:border-primary">
           <option value="">Choose a subject</option>
           {subjects.map((s) => (
             <option key={s} value={s}>
@@ -67,7 +84,7 @@ export function ContactForm() {
       </Field>
 
       <Field label="Message" required>
-        <textarea required rows={5} className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary resize-none" />
+        <textarea required name="message" rows={5} className="w-full border border-border px-3 py-2.5 text-sm outline-none focus:border-primary resize-none" />
       </Field>
 
       <label className="flex items-start gap-2 text-xs text-muted-foreground">

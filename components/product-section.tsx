@@ -1,116 +1,34 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Search, ChevronDown, Globe, Droplet, SlidersHorizontal, Leaf } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-const products = [
-  {
-    id: 1,
-    name: "Desert Sand",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
-    category: "Marble",
-    isNew: true,
-    isEco: false,
-    hue: "beige"
-  },
-  {
-    id: 2,
-    name: "Coco Brown",
-    image: "https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=400&q=80",
-    category: "Plain Surface",
-    isNew: true,
-    isEco: true,
-    hue: "brown"
-  },
-  {
-    id: 3,
-    name: "Ivory Cream",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
-    category: "Plain Surface",
-    isNew: true,
-    isEco: true,
-    hue: "cream"
-  },
-  {
-    id: 4,
-    name: "Silver Marble",
-    image: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=400&q=80",
-    category: "Marble",
-    isNew: false,
-    isEco: false,
-    hue: "grey"
-  },
-  {
-    id: 5,
-    name: "Arctic White",
-    image: "https://images.unsplash.com/photo-1604709177225-055f99402ea3?w=400&q=80",
-    category: "Sparkle",
-    isNew: false,
-    isEco: false,
-    hue: "white"
-  },
-  {
-    id: 6,
-    name: "Midnight Black",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
-    category: "Plain Surface",
-    isNew: true,
-    isEco: false,
-    hue: "black"
-  },
-  {
-    id: 7,
-    name: "Ocean Blue",
-    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&q=80",
-    category: "Translucent",
-    isNew: false,
-    isEco: true,
-    hue: "blue"
-  },
-  {
-    id: 8,
-    name: "Rose Quartz",
-    image: "https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=400&q=80",
-    category: "Sparkle",
-    isNew: true,
-    isEco: false,
-    hue: "pink"
-  },
-  {
-    id: 9,
-    name: "Forest Green",
-    image: "https://images.unsplash.com/photo-1604709177225-055f99402ea3?w=400&q=80",
-    category: "Mosaic",
-    isNew: false,
-    isEco: true,
-    hue: "green"
-  },
-  {
-    id: 10,
-    name: "Golden Alabaster",
-    image: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=400&q=80",
-    category: "Alabaster",
-    isNew: true,
-    isEco: false,
-    hue: "gold"
-  },
-]
+import { apiRequest } from "@/lib/admin-auth"
 
 const categories = ["All", "Alabaster", "Marble", "Mosaic", "Sparkle", "Translucent", "Plain Surface"]
 
 export function ProductSection() {
+  const [products, setProducts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [isRegionOpen, setIsRegionOpen] = useState(false)
   const [isHueOpen, setIsHueOpen] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
+  useEffect(() => {
+    apiRequest('/products')
+      .then(data => setProducts(data))
+      .catch(err => console.error('Error fetching products:', err))
+      .finally(() => setLoading(false))
+  }, [])
+
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === "All" || product.category === selectedCategory
+    const productCat = typeof product.category === 'object' ? product.category.name : product.category;
+    const matchesCategory = selectedCategory === "All" || productCat === selectedCategory
     return matchesSearch && matchesCategory
-  })
+  }).slice(0, 10) // Show top 10 on home
 
   return (
     <section className="py-20 px-6 lg:px-12 bg-background">
@@ -202,14 +120,14 @@ export function ProductSection() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {filteredProducts.map((product) => (
             <a
-              key={product.id}
-              href={`/products/${product.id}`}
+              key={product.slug || product._id}
+              href={`/products/${product.slug}`}
               className="group relative aspect-square overflow-hidden bg-muted transition-transform duration-250 hover:-translate-y-1.5"
             >
               {/* Product Image */}
               <div
                 className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                style={{ backgroundImage: `url(${product.image})` }}
+                style={{ backgroundImage: `url(${product.images?.[0]?.url || product.image || '/placeholder.svg'})` }}
               />
 
               {/* Badges */}

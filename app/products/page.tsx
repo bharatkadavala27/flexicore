@@ -52,14 +52,21 @@ export default function ProductsPage() {
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
-      if (cat !== "all" && p.category !== cat) return false
-      if (industry !== "all" && !p.industries.includes(industry)) return false
+      // Handle both object and string categories from backend/static
+      const productCatSlug = typeof p.category === 'object' ? p.category.slug : p.category;
+      
+      if (cat !== "all" && productCatSlug !== cat) return false
+      
+      // Handle industries (backend might return objects or strings)
+      const productIndustries = p.industries?.map((i: any) => typeof i === 'object' ? i.slug || i.name : i) || [];
+      if (industry !== "all" && !productIndustries.includes(industry)) return false
+      
       if (hue !== "All" && p.hue !== hue) return false
       if (region !== "All" && p.region !== region) return false
       if (query && !p.name.toLowerCase().includes(query.toLowerCase())) return false
       return true
     })
-  }, [query, cat, industry, hue, region])
+  }, [products, query, cat, industry, hue, region])
 
   const activeIndustryLabel = industries.find((i) => i.id === industry)?.label
 
@@ -311,7 +318,9 @@ export default function ProductsPage() {
                   )}
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-foreground/80 via-foreground/30 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <h3 className="text-white font-semibold">{p.name}</h3>
-                    <p className="text-white/70 text-xs capitalize">{p.category}</p>
+                    <p className="text-white/70 text-xs capitalize">
+                      {typeof p.category === 'object' ? p.category.name : p.category}
+                    </p>
                   </div>
                 </Link>
               ))}
