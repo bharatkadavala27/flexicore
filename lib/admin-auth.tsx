@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL 
   ? process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '')
-  : 'http://localhost:5000';
+  : 'https://flexicore1.onrender.com';
 
 const API_BASE = `${API_BASE_URL}/api`;
 
