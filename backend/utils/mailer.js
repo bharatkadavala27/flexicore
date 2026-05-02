@@ -2,9 +2,9 @@ const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   host: (process.env.MAIL_HOST || "").replace(/^https?:\/\//, "").replace(/\/$/, ""),
-  port: parseInt(process.env.MAIL_PORT || "465"),
-  secure: (process.env.MAIL_PORT == 465 || process.env.MAIL_ENCRYPTION === "ssl"),
-  family: 4, // Force IPv4 to avoid ENETUNREACH on IPv6
+  port: 587, // Switch to 587 (TLS)
+  secure: false, // Must be false for 587
+  family: 4, // Force IPv4
   auth: {
     user: process.env.MAIL_USERNAME,
     pass: process.env.MAIL_PASSWORD,
