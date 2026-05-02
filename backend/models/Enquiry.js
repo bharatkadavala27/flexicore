@@ -4,7 +4,9 @@ const s = new mongoose.Schema({
   email: { type: String, required: true },
   phone: String,
   message: String,
-  type: { type: String, enum: ["contact", "product"], default: "contact" },
+  subject: String,
+  country: String,
+  type: { type: String, enum: ["contact", "product", "product_enquiry"], default: "contact" },
   productName: String,
   isRead: { type: Boolean, default: false },
 }, { timestamps: true });

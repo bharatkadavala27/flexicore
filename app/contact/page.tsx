@@ -36,7 +36,7 @@ export default function ContactPage() {
       <PageHeader
         title="Let's build something together."
         breadcrumb={[{ label: "Home", href: "/" }, { label: "Contact" }]}
-        bgImage="/modern-office-reception-area.jpg"
+        bgImage="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80"
       />
 
       <section className="py-16 md:py-24 px-4 md:px-8">

@@ -13,7 +13,7 @@ import {
   breadcrumbSchema,
   faqSchema,
 } from "@/components/json-ld"
-import { getProduct, getRelatedProducts, products } from "@/lib/products-data"
+import { getProduct, getRelatedProducts, products, type Product } from "@/lib/products-data"
 import { API_BASE, API_BASE_URL } from "@/lib/admin-auth"
 import { fetchFromApi } from "@/lib/api-utils"
 
@@ -33,7 +33,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
-  let p: any;
+  let p: Product | null = null;
   try {
     p = await fetchFromApi(`/products/slug/${slug}`);
   } catch {
@@ -42,15 +42,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   
   if (!p) return { title: "Product not found" }
   return {
-    title: `${p.name} - ${p.category?.name || p.category}`,
+    title: `${p.name} - ${(p.category as any)?.name || p.category}`,
     description: p.description,
-    openGraph: { images: [p.images?.[0]?.url || p.image] },
+    openGraph: { images: [(p.images as any)?.[0]?.url || (p as any).image] },
   }
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params
-  let product: any;
+  let product: Product | any = null;
   try {
     product = await fetchFromApi(`/products/slug/${slug}`);
     if (!product || product.message) throw new Error("Product not found");
@@ -60,7 +60,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   
   if (!product) notFound()
 
-  const related = getRelatedProducts(product.slug, product.category?.slug || product.category)
+  const related = getRelatedProducts(product.slug, (product.category as any)?.slug || product.category)
   const productUrl = `${SITE_URL}/products/${product.slug}`
 
   const schemas: Record<string, unknown>[] = [
@@ -69,7 +69,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         description: product.description,
         image: product.images?.[0]?.url || product.image,
         sku: product.sku,
-        category: product.category?.name || product.category,
+        category: (product.category as any)?.name || product.category,
       }),
     breadcrumbSchema([
       { name: "Home", url: `${SITE_URL}/` },
@@ -94,7 +94,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             Products
           </Link>
           <span>/</span>
-          <span className="capitalize">{product.category?.name || product.category}</span>
+          <span className="capitalize">{(product.category as any)?.name || product.category}</span>
           <span>/</span>
           <span className="text-foreground">{product.name}</span>
         </div>
@@ -109,7 +109,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           {/* Info */}
           <div className="flex flex-col">
             <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
-              <span className="capitalize">{product.category?.name || product.category}</span>
+              <span className="capitalize">{(product.category as any)?.name || product.category}</span>
               {product.isNew && (
                 <span className="bg-primary text-primary-foreground px-2 py-0.5 font-semibold">
                   New
@@ -162,7 +162,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                   Industries
                 </h3>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {product.industries.map((ind) => (
+                  {product.industries.map((ind: string) => (
                     <span
                       key={ind}
                       className="inline-flex items-center bg-secondary text-foreground text-xs px-3 py-1 capitalize"
@@ -180,7 +180,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 Features
               </h3>
               <ul className="mt-3 grid grid-cols-2 gap-2">
-                {product.features.map((f) => (
+                {product.features.map((f: string) => (
                   <li key={f} className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-primary shrink-0" />
                     {f}
@@ -195,7 +195,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 Applications
               </h3>
               <div className="mt-3 flex flex-wrap gap-2">
-                {product.applications.map((a) => (
+                {product.applications.map((a: string) => (
                   <span
                     key={a}
                     className="inline-flex items-center bg-secondary text-foreground text-xs px-3 py-1"
