@@ -1,16 +1,21 @@
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  host: (process.env.MAIL_HOST || "").replace(/^https?:\/\//, "").replace(/\/$/, ""),
-  port: 587, // Switch to 587 (TLS)
-  secure: false, // Must be false for 587
-  family: 4, // Force IPv4
+  host: "smtp.hostinger.com",
+  port: 587,
+  secure: false,
+  requireTLS: true,
+  family: 4,
+  connectionTimeout: 10000, // 10 seconds
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
   auth: {
     user: process.env.MAIL_USERNAME,
     pass: process.env.MAIL_PASSWORD,
   },
   tls: {
-    rejectUnauthorized: false // Often needed for Hostinger shared hosting
+    rejectUnauthorized: false,
+    minVersion: 'TLSv1.2'
   },
   debug: true,
   logger: true
