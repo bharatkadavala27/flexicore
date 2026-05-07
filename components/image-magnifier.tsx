@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 
 type Props = {
   src: string
@@ -9,58 +9,111 @@ type Props = {
   className?: string
 }
 
-export function ImageMagnifier({ src, alt, zoom = 2.5, className = "" }: Props) {
+export function ImageMagnifier({ src, alt, zoom = 3, className = "" }: Props) {
   const [show, setShow] = useState(false)
-  const [pos, setPos] = useState({ x: 0, y: 0 })
+  const [lensPos, setLensPos] = useState({ x: 0, y: 0 })
   const [bgPos, setBgPos] = useState({ x: 0, y: 0 })
-  const ref = useRef<HTMLDivElement>(null)
+  const [rect, setRect] = useState<DOMRect | null>(null)
+  const [isLargeScreen, setIsLargeScreen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  const lensSize = 160
+  // Selection box size
+  const lensWidth = 100
+  const lensHeight = 100
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = ref.current
+  useEffect(() => {
+    const checkScreen = () => setIsLargeScreen(window.innerWidth >= 1024)
+    checkScreen()
+    window.addEventListener("resize", checkScreen)
+    return () => window.removeEventListener("resize", checkScreen)
+  }, [])
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const el = containerRef.current
     if (!el) return
-    const rect = el.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
 
-    const halfLens = lensSize / 2
-    const lensX = Math.max(halfLens, Math.min(x, rect.width - halfLens))
-    const lensY = Math.max(halfLens, Math.min(y, rect.height - halfLens))
-    setPos({ x: lensX, y: lensY })
+    const currentRect = el.getBoundingClientRect()
+    
+    // Smoothly update rect if it changes
+    if (!rect || Math.abs(rect.top - currentRect.top) > 5) {
+      setRect(currentRect)
+    }
 
-    const bgX = ((lensX - halfLens) / (rect.width - lensSize)) * 100
-    const bgY = ((lensY - halfLens) / (rect.height - lensSize)) * 100
-    setBgPos({ x: bgX, y: bgY })
+    const x = e.clientX - currentRect.left
+    const y = e.clientY - currentRect.top
+
+    let lx = x - lensWidth / 2
+    let ly = y - lensHeight / 2
+
+    // Bounds check
+    lx = Math.max(0, Math.min(lx, currentRect.width - lensWidth))
+    ly = Math.max(0, Math.min(ly, currentRect.height - lensHeight))
+
+    setLensPos({ x: lx, y: ly })
+
+    // Background percentage for the zoomed window
+    const bx = (lx / (currentRect.width - lensWidth)) * 100
+    const by = (ly / (currentRect.height - lensHeight)) * 100
+    setBgPos({ x: bx, y: by })
   }
 
   return (
-    <div
-      ref={ref}
-      className={`relative overflow-hidden cursor-crosshair select-none ${className}`}
-      onMouseEnter={() => setShow(true)}
-      onMouseLeave={() => setShow(false)}
-      onMouseMove={handleMouseMove}
-    >
-      <img src={src || "/placeholder.svg"} alt={alt} className="w-full h-full object-cover" draggable={false} />
-      {show && (
-        <div
-          className="pointer-events-none absolute rounded-full border-2 border-white shadow-xl"
-          style={{
-            width: lensSize,
-            height: lensSize,
-            left: pos.x - lensSize / 2,
-            top: pos.y - lensSize / 2,
-            backgroundImage: `url(${src})`,
-            backgroundRepeat: "no-repeat",
-            backgroundSize: `${zoom * 100}%`,
-            backgroundPosition: `${bgPos.x}% ${bgPos.y}%`,
-            boxShadow: "0 0 0 9999px rgba(0,0,0,0.15), 0 10px 30px rgba(0,0,0,0.3)",
-          }}
+    <div className={`relative ${className}`}>
+      <div
+        ref={containerRef}
+        className="relative w-full h-full cursor-crosshair select-none group border border-border/50"
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        onMouseMove={handleMouseMove}
+      >
+        <img
+          src={src || "/placeholder.svg"}
+          alt={alt}
+          className="w-full h-full object-cover"
+          draggable={false}
         />
-      )}
-      <div className="absolute bottom-3 left-3 bg-black/60 text-white text-[10px] uppercase tracking-wider px-2 py-1">
-        Hover to zoom
+
+        {show && (
+          <>
+            {/* 1. Selection Lens (On Image) */}
+            <div
+              className="pointer-events-none absolute border-2 border-primary bg-primary/10 shadow-2xl z-[50]"
+              style={{
+                width: lensWidth,
+                height: lensHeight,
+                left: lensPos.x,
+                top: lensPos.y,
+              }}
+            />
+
+            {/* 2. Zoom Result (Side Window) - Only on Desktop */}
+            {isLargeScreen && rect && (
+              <div
+                className="fixed pointer-events-none border-2 border-border shadow-[0_20px_50px_rgba(0,0,0,0.2)] bg-white z-[9999]"
+                style={{
+                  top: rect.top,
+                  left: rect.right + 30,
+                  width: 500, // Fixed width for better control
+                  height: rect.height,
+                  backgroundImage: `url(${src})`,
+                  backgroundRepeat: "no-repeat",
+                  backgroundSize: `${zoom * 100}%`,
+                  backgroundPosition: `${bgPos.x}% ${bgPos.y}%`,
+                }}
+              >
+                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] px-3 py-1 uppercase tracking-widest font-bold">
+                    HD Zoom
+                 </div>
+              </div>
+            )}
+            
+            {/* 3. Mobile fallback: If not large screen, maybe show a small internal zoom? */}
+          </>
+        )}
+
+        <div className="absolute bottom-3 left-3 bg-black/70 text-white text-[10px] uppercase tracking-wider px-2 py-1 z-30 font-medium">
+          Hover to enlarge
+        </div>
       </div>
     </div>
   )
